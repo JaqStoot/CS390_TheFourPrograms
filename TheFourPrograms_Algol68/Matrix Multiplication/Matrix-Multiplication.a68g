@@ -1,0 +1,107 @@
+BEGIN
+
+	INT arow,acol,brow,bcol;
+	BOOL help := TRUE;
+
+	WHILE help;
+
+		print(("Matrix 1 - ROWS: "));
+		arow := read int;
+
+
+		print(("Matrix 1 - COLUMNS: "));
+		acol := read int;
+
+
+		print(("Matrix 2 - ROWS: "));
+		brow := read int;
+
+
+
+		print(("Matrix 2 - COLUMNS: "));
+		bcol := read int;
+
+
+		# Extremely robust exception handling #
+		IF acol /= brow THEN
+			print((newline,"Invalid Dimensions",newline,newline));
+			help := TRUE
+
+		# if dimensions are valid, proceed to data entry/calculation #
+		ELSE
+			# Initialize the matricies here because it wouldn't let me do it after the DO SKIP DO statement. #
+			[1:arow,1:acol] INT matrixa;
+			[1:brow,1:bcol] INT matrixb;
+			[1:arow,1:bcol] INT matrixc;
+
+
+			# Enter data into matrix 1 #
+			print(("Enter data for matrix 1",newline));
+			FOR i FROM 1 TO arow DO
+				FOR j FROM 1 TO acol DO
+					read(matrixa[i,j])
+				OD
+			OD;
+
+
+			# Enter data int matrix 2 #
+			print(("Enter data for matrix 2",newline));
+			FOR i FROM 1 TO brow DO
+				FOR j FROM 1 TO bcol DO
+					read(matrixb[i,j])
+				OD
+			OD;
+
+			# fill matrixc with 0s to begin with #
+			FOR i FROM 1 TO arow DO
+				FOR j FROM 1 TO bcol DO
+					matrixc[i,j] := 0
+				OD
+			OD;
+
+
+			# Calculate the result #
+			FOR i FROM 1 TO arow DO
+				FOR j FROM 1 TO bcol DO
+					FOR k FROM 1 TO brow DO
+						matrixc[i,j] := matrixc[i,j] + (matrixa[i,k] * matrixb[k,j])
+					OD	
+				OD
+			OD;
+
+			#print((matrixa,newline,matrixb,newline,matrixc));#
+			
+			print(("Matrix 1:",newline));
+			FOR i FROM 1 TO arow DO
+				FOR j FROM 1 TO acol DO
+					print((matrixa[i,j]))
+				OD;
+				print((newline))
+			OD;
+
+			print(("Matrix 2:",newline));
+			FOR i FROM 1 TO brow DO
+				FOR j FROM 1 TO bcol DO
+					print((matrixb[i,j]))
+				OD;
+				print((newline))
+			OD;
+
+
+			print(("Matrix 1 * Matrix 2:",newline));
+			FOR i FROM 1 TO arow DO
+				FOR j FROM 1 TO bcol DO
+					print((matrixc[i,j]))
+				OD;
+				print((newline))
+			OD;
+
+
+
+			help := FALSE # Condition for exiting the while loop #
+		FI
+
+	DO SKIP OD
+
+END
+

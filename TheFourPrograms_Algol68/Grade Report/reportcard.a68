@@ -1,0 +1,235 @@
+# Report Card #
+
+BEGIN
+
+	PROC convertint = (STRING n) INT:
+	BEGIN
+		INT out := 0;
+		FOR i FROM 1 TO UPB n DO
+			INT num := ABS n[i] - 48;
+			out := out * 10 + num
+		OD;
+		out
+	END;
+	
+	# Variable init #
+
+	BOOL eof := FALSE;
+	INT index := 1;
+	INT j := 1;
+
+	[1:6] STRING arrassignname;
+	[1:6] STRING arrcategory;
+	[1:6] STRING arrposspoints;
+	[1:6] STRING arrearnpoints;
+
+	REAL pcnt := 0;	
+	INT earnpointstemp := 0;
+
+	INT posspointstotal := 0;
+	INT earnpointstotal := 0;
+	
+	INT groupprojecttotal := 250;
+	INT homeworktotal := 250;
+	INT progtotal := 250;
+	INT quizzestotal := 250;
+	STRING totalpoints;
+	INT inttotalpoints := 1000;
+	STRING line;
+
+	INT groupprojectearn := 0;
+	INT homeworkearn := 0;
+	INT progearn := 0;
+	INT quizzesearn := 0;
+
+	REAL currentgrade := 0;
+	REAL minfinalgrade := 0;
+	REAL maxfinalgrade := 0;
+	STRING filename;
+	# input #
+	
+	# open file #
+	print(("File: "));
+	read((filename));
+	FILE file;
+	
+
+	open(file, filename, stand in channel);
+
+	on logical file end(file, (REF FILE f) BOOL: (eof := TRUE));
+	
+	get(file, line);
+	posspointstotal := convertint(line);
+
+	INT previousindex := 1;
+	INT saveindex := 1;
+	STRING entry := "";
+	FOR i FROM 1 TO 6 WHILE (~eof) DO
+		get(file, line);
+		
+					
+		FOR j FROM 1 TO UPB line 
+		DO
+			
+
+			IF line[j] = " " THEN
+				IF j+1 > UPB line THEN
+					saveindex = 1
+				
+				ELSE 
+					IF line[j+1] = " " THEN
+						saveindex := j - 1;
+
+						FOR previousindex TO saveindex 
+						DO
+							entry := entry + line[j]
+						OD;
+
+						IF saveindex < 20 THEN
+							arrassignname[i] := entry
+						FI;
+
+						IF entry = "Group Project"  THEN
+							arrcategory[i] := entry
+						FI;
+
+						IF entry = "Programming"  THEN
+							arrcategory[i] := entry
+						FI;
+
+						IF entry = "Quizzes"  THEN
+							arrcategory[i] := entry
+						FI;
+
+						IF entry = "Homework"  THEN
+							arrcategory[i] := entry
+						FI;
+
+						IF saveindex < 42 THEN
+							arrposspoints[i] := entry
+						FI;
+
+						IF saveindex > 42 THEN
+							arrearnpoints[i] := entry
+						FI
+					FI
+
+				FI
+			FI;
+
+		previousindex := saveindex;
+		entry := ""
+		OD;
+
+		
+		new line (file)
+	OD;
+			
+
+
+	inttotalpoints := convertint(totalpoints);
+
+	FOR i FROM 1 TO 6
+	DO
+		IF arrcategory[i] = "Group Project       " THEN
+			arrcategory[i] := "Group Project";
+			groupprojecttotal := groupprojecttotal + convertint(arrposspoints[i]);
+			groupprojectearn := groupprojectearn + convertint(arrearnpoints[i])
+		FI;
+		IF arrcategory[i] = "Programming         " THEN
+			arrcategory[i] := "Programming";
+			progtotal := progtotal + convertint(arrposspoints[i]);
+			progearn := progearn + convertint(arrearnpoints[i])
+		FI;
+		IF arrcategory[i] = "Quizzes       " THEN
+			arrcategory[i] := "Quizzes";
+			quizzestotal := quizzestotal + convertint(arrposspoints[i]);
+			quizzesearn := quizzesearn + convertint(arrearnpoints[i])
+		FI;
+		IF arrcategory[i] = "Homework      " THEN
+			arrcategory[i] := "Homework";
+			homeworktotal := homeworktotal + convertint(arrposspoints[i]);
+			homeworkearn := homeworkearn + convertint(arrearnpoints[i])
+		FI	
+	OD;
+
+	# output #
+	
+	# Group Project Output #
+	print(("GROUP PROJECT",newline));
+	print(("=================================",newline));
+	
+	FOR i FROM 1 TO 6
+	DO
+		IF arrcategory[i] = "Group Project" THEN
+			pcnt := (convertint(arrearnpoints[i])*100)/convertint(arrposspoints[i]);
+			print((arrassignname[i],arrearnpoints[i],"/",arrposspoints[i],"   ",pcnt,"%",newline))
+		FI
+	OD;
+	print(("=================================",newline));
+	
+	pcnt := (groupprojectearn*100)/groupprojecttotal;
+	print(("                     ",groupprojectearn,"/",groupprojecttotal,"   ",pcnt,"%",newline));
+	
+	
+
+
+	# Homework output #
+	print(("HOMEWORK",newline));
+	print(("=================================",newline));	
+	FOR i FROM 1 TO 6
+	DO
+		IF arrcategory[i] = "Homework" THEN
+			pcnt := (convertint(arrearnpoints[i])*100)/convertint(arrposspoints[i]);
+			print((arrassignname[i],arrearnpoints[i],"/",arrposspoints[i],"   ",pcnt,"%",newline))
+		FI
+	OD;
+	print(("=================================",newline));
+
+	pcnt := (homeworkearn*100)/homeworktotal;
+	print(("                     ",homeworkearn,"/",homeworktotal,"   ",pcnt,"%",newline));
+
+
+
+	print(("PROGRAMMING",newline));
+	print(("=================================",newline));
+	
+	FOR i FROM 1 TO 6
+	DO
+		IF arrcategory[i] = "Programming" THEN
+			pcnt := (convertint(arrearnpoints[i])*100)/convertint(arrposspoints[i]);
+			print((arrassignname[i],arrearnpoints[i],"/",arrposspoints[i],"   ",pcnt,"%",newline))
+		FI
+	OD;
+	print(("=================================",newline));
+
+	pcnt := (progearn*100)/progtotal;
+	print(("                     ",progearn,"/",progtotal,"   ",pcnt,"%",newline));
+
+
+
+
+	print(("QUIZZES",newline));
+	print(("=================================",newline));
+	
+	FOR i FROM 1 TO 6
+	DO
+		IF arrcategory[i] = "Quizzes" THEN
+			pcnt := (convertint(arrearnpoints[i])*100)/convertint(arrposspoints[i]);
+			print((arrassignname[i],arrearnpoints[i],"/",arrposspoints[i],"   ",pcnt,"%",newline))
+		FI
+	OD;
+	print(("=================================",newline));
+
+	pcnt := (quizzesearn*100)/quizzestotal;
+	print(("                     ",quizzesearn,"/",quizzestotal,"   ",pcnt,"%"));
+
+	currentgrade := (earnpointstotal*100)/posspointstotal;
+	minfinalgrade := (earnpointstotal)/inttotalpoints;
+	maxfinalgrade := (inttotalpoints-(posspointstotal - earnpointstotal))/inttotalpoints;
+
+	print(("Current Grade: ",currentgrade,newline));
+	print(("Minimum Final Grade: ",minfinalgrade,newline));
+	print(("Maximum Final Grade: ",maxfinalgrade,newline))
+
+END

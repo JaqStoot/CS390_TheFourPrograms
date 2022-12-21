@@ -1,0 +1,233 @@
+BEGIN
+    PROC convertint = (STRING n) INT:
+    BEGIN
+        INT out := 0;
+        FOR i FROM 1 TO UPB n DO
+            INT num := ABS n[i] - 48;
+            out := out * 10 + num
+        OD;
+        out
+    END;
+    
+    PROC checkor = ([] STRING next, [] STRING completedcourses, STRING preqs) BOOL:
+    BEGIN
+        BOOL out := FALSE;
+        BOOL break := FALSE;
+        STRING course;
+        
+        FOR i FROM 1 TO UPB preqs DO
+            IF preqs[i] /= " " THEN
+                course +:= preqs[i]
+            FI;
+            
+            IF preqs[i] = " " THEN
+                IF checkand(next, completedcourses, course) THEN
+                    out := TRUE;
+                    break := TRUE
+                FI
+            FI
+        OD;
+        out
+    END;
+    
+    PROC checkand = ([] STRING next, [] STRING completedcourses, STRING preqs) BOOL:
+    BEGIN
+        BOOL out := TRUE;
+        BOOL break := FALSE;
+        STRING course;
+        
+        FOR i FROM 1 TO UPB preqs DO
+            break := FALSE;
+            
+            IF preqs[i] /= "," THEN
+                course +:= preqs[i]
+            FI;
+            
+            IF preqs[i] = "," OR i = UPB preqs THEN
+               FOR j FROM 1 TO 100 WHILE ~break DO
+                    IF completedcourses[j] = course & completedcourses[j] /= "" THEN
+                        break := TRUE
+                    FI;
+                    
+                    IF course = "" & courses[i] /= "" THEN
+                        break := TRUE
+                    FI;
+                    
+                    IF ~break & j = 100 THEN
+                        out := FALSE
+                    FI
+                OD;
+                
+                course := ""
+            FI
+        OD;
+        out
+    END;
+    
+    FILE file;
+    STRING filename := "sophomore.txt";
+    
+    BOOL eof := FALSE;
+    INT index := 1;
+    
+    REAL gpa := 0.0;
+    INT attempted := 0;
+    INT completed := 0;
+    INT remaining := 0;
+    
+    STRING line;
+    [100] STRING courses;
+    [100] STRING credits;
+    [100] STRING preqs;
+    [100] STRING grades;
+    
+    [100] STRING completedcourses;
+    INT completedindex := 1;
+    [100] STRING next;
+    INT nextindex := 1;
+    
+    
+    # Read data from file #
+    print(("File: "));
+    read((filename));
+    
+    open(file, filename, stand in channel);
+    on logical file end (file, (REF FILE f) BOOL: (eof := TRUE));
+    
+    FOR i FROM 1 TO 100 WHILE (~eof) DO
+        index := 1;
+        get(file, line);
+        
+        FOR j FROM 1 TO UPB line DO
+            IF line[j] = "|" THEN
+                index +:= 1
+            ELSE
+                CASE index IN
+                    courses[i] +:= line[j],
+                    credits[i] +:= line[j],
+                    preqs[i] +:= line[j],
+                    grades[i] +:= line[j]
+                ESAC
+            FI
+        OD;
+        
+        newline(file)
+    OD;
+    
+    FOR i FROM 1 TO 100 DO
+        IF grades[i] = "A" THEN
+            completedcourses[completedindex] := courses[i];
+            
+            gpa +:= 4 * convertint(credits[i]);
+            attempted +:= convertint(credits[i]);
+            completed +:= convertint(credits[i]);
+            
+            completedindex +:= 1
+        FI;
+        IF grades[i] = "B" THEN
+            completedcourses[completedindex] := courses[i];
+            
+            gpa +:= 3 * convertint(credits[i]);
+            attempted +:= convertint(credits[i]);
+            completed +:= convertint(credits[i]);
+            
+            completedindex +:= 1
+        FI;
+        IF grades[i] = "C" THEN
+            completedcourses[completedindex] := courses[i];
+            
+            gpa +:= 2 * convertint(credits[i]);
+            attempted +:= convertint(credits[i]);
+            completed +:= convertint(credits[i]);
+            
+            completedindex +:= 1
+        FI;
+        IF grades[i] = "D" THEN
+            completedcourses[completedindex] := courses[i];
+            
+            gpa +:= convertint(credits[i]);
+            attempted +:= convertint(credits[i]);
+            completed +:= convertint(credits[i]);
+            
+            completedindex +:= 1
+        FI;
+        IF grades[i] = "F" THEN
+            attempted +:= convertint(credits[i])
+        FI
+    OD;
+    
+    FOR i FROM 1 TO 100 DO
+        BOOL break := FALSE;
+        BOOL andlogic := FALSE;
+        BOOL orlogic := FALSE;
+        
+        IF grades[i] = "" OR grades[i] = "F" THEN
+            remaining +:= convertint(credits[i]);
+            
+            FOR k FROM 1 TO UPB preqs[i] DO
+                IF preqs[i][k] = " " & preqs[i] /= "Senior Standing" THEN
+                    orlogic := TRUE
+                FI;
+                
+                IF preqs[i][k] = "," THEN
+                    andlogic := TRUE
+                FI
+            OD;
+            
+            IF orlogic THEN
+                IF checkor(next, completedcourses, preqs[i]) THEN
+                    next[nextindex] := courses[i];
+                        nextindex +:= 1
+                FI
+            FI;
+            
+            IF andlogic & ~orlogic THEN
+                IF checkand(next, completedcourses, preqs[i]) THEN
+                    next[nextindex] := courses[i];
+                        nextindex +:= 1
+                FI
+            FI;
+            
+            IF ~andlogic & ~orlogic THEN
+                FOR j FROM 1 TO 100 WHILE ~break DO
+                    IF completedcourses[j] = preqs[i] & completedcourses[j] /= "" THEN
+                        next[nextindex] := courses[i];
+                        nextindex +:= 1;
+                        
+                        break := TRUE
+                    FI;
+                    
+                    IF preqs[i] = "" & courses[i] /= "" THEN
+                        next[nextindex] := courses[i];
+                        nextindex +:= 1;
+                        
+                        break := TRUE
+                    FI
+                OD
+            FI
+        FI
+    OD;
+    
+    IF attempted /= 0 THEN
+        gpa /:= attempted
+    ELSE
+        gpa := 0
+    FI;
+    
+    # Display results #
+    printf(($gd.2dl$,"GPA: ", gpa));
+    printf(($gg(0)l$, "Hours Attempted: ", attempted));
+    printf(($gg(0)l$, "Hours Completed: ", completed));
+    printf(($gg(0)ll$, "Credits Remaining: ", remaining));
+    
+    print(("Possible Courses to Take Next", newline));
+    IF remaining = 0 THEN
+        print(("None - Congratulations!", newline))
+    ELSE
+        FOR i FROM 1 TO 100 DO
+            IF next[i] /= "" THEN
+                print((next[i], newline))
+            FI
+        OD
+    FI
+END

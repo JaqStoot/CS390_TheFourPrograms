@@ -1,0 +1,65 @@
+BEGIN
+[10] INT arr;
+[10] INT stk;
+print(("Enter 10 Integers", newline));
+FOR i FROM 1 TO 10
+DO
+	read(arr[i])
+OD;
+
+INT leftpointer;
+INT rightpointer;
+INT pivot;
+INT stkpointer := 2;
+INT lowindex := 1;
+INT highindex := 10;
+stk[1] := lowindex;
+stk[2] := highindex;
+INT temp;
+WHILE stkpointer /= 0
+DO
+	rightpointer := stk[stkpointer];
+	stkpointer := stkpointer - 1;
+	leftpointer := stk[stkpointer];
+	stkpointer := stkpointer - 1;
+	lowindex := leftpointer;
+	pivot := rightpointer;
+	WHILE leftpointer /= rightpointer
+	DO
+		WHILE arr[leftpointer] <= arr[pivot] AND leftpointer < rightpointer
+		DO
+			leftpointer := leftpointer + 1
+		OD;
+		WHILE arr[rightpointer] >= arr[pivot] AND leftpointer < rightpointer
+		DO
+			rightpointer := rightpointer -1
+		OD;
+		temp := arr[leftpointer];
+		arr[leftpointer] := arr[rightpointer];
+		arr[rightpointer] := temp
+	OD;
+
+	temp := arr[leftpointer];
+	arr[leftpointer] := arr[pivot];
+	arr[pivot] := temp;
+	IF leftpointer + 1 < pivot
+	THEN
+		stkpointer := stkpointer + 1;
+		stk[stkpointer] := leftpointer + 1;
+		stkpointer := stkpointer +1;
+		stk[stkpointer] := pivot
+	FI;
+	IF lowindex + 1 < leftpointer
+	THEN
+		stkpointer := stkpointer + 1;
+		stk[stkpointer] := lowindex;
+		stkpointer := stkpointer + 1;
+		stk[stkpointer] := leftpointer - 1
+	FI
+OD;
+
+FOR i FROM 1 TO 10
+DO
+	print((arr[i],newline))
+OD
+END

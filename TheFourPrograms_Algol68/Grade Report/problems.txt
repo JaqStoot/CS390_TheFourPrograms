@@ -1,0 +1,3 @@
+Importing the file and reading the information was a large struggle. 
+We believe the it should be working except one part is missing to allow 
+the information to get through.
